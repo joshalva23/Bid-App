@@ -6,10 +6,12 @@ function SignUpPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_DNS}/api/signup`, {
@@ -18,14 +20,18 @@ function SignUpPage() {
         body: JSON.stringify({ email, password, name }),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error('Sign-up failed');
+        throw new Error(result.message ?? "Sign Up Failed");
       }
 
       // Redirect to login page on successful sign-up
       navigate('/');
     } catch (err) {
       setError(err.message);
+    } finally{  
+      setLoading(false);
     }
   };
 
@@ -65,12 +71,26 @@ function SignUpPage() {
             />
           </div>
           {error && <p className="text-red-500 mb-4">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            Sign Up
-          </button>
+          {!loading &&
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              Sign Up
+            </button>
+          }
+          {loading && <div
+              className='w-full bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center'  
+            >
+              <div
+                className="w-8 aspect-[1/1] border-4 border-dashed rounded-full animate-spin border-white"
+                role="status"
+                aria-label="Loading"
+              >
+
+              </div>
+            </div>
+          }
           <p className="mt-4 text-sm text-gray-600">
             Already have an account? <a href="/" className="text-blue-500 hover:underline">Login</a>
           </p>
